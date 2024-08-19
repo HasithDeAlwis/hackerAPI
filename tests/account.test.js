@@ -8,7 +8,7 @@ chai.should();
 const Constants = {
     Error: require("../constants/error.constant"),
     General: require("../constants/general.constant"),
-    Success: require("../constants/success.constant")
+    Success: require("../constants/success.constant"),
 };
 
 const util = {
@@ -18,8 +18,7 @@ const util = {
     reset: require("./util/resetPassword.test.util"),
     role: require("./util/role.test.util"),
     roleBinding: require("./util/roleBinding.test.util"),
-    accountConfirmation: require("./util/accountConfirmation.test.util"),
-    resetPassword: require("./util/resetPassword.test.util.js")
+    resetPassword: require("./util/resetPassword.test.util.js"),
 };
 const agent = chai.request.agent(server.app);
 // tokens
@@ -44,13 +43,13 @@ const newAccount0 = util.account.unlinkedAccounts.new[0];
 //This account should NOT have a phone number
 const noPhoneAccount = util.account.NoPhoneHackerAccount0;
 
-describe("GET user account", function() {
+describe("GET user account", function () {
     async function storeAll() {
         await util.account.storeHackerStaffAccounts();
         await util.role.storeAll();
         await util.roleBinding.storeAll();
     }
-    beforeEach(function(done) {
+    beforeEach(function (done) {
         this.timeout(60000);
         storeAll()
             .then(() => {
@@ -60,10 +59,10 @@ describe("GET user account", function() {
                 done(error);
             });
     });
-    it("should FAIL to list the user's account on /api/account/self GET due to authentication", function(done) {
+    it("should FAIL to list the user's account on /api/account/self GET due to authentication", function (done) {
         chai.request(server.app)
             .get("/api/account/self")
-            .end(function(err, res) {
+            .end(function (err, res) {
                 res.should.have.status(401);
                 res.should.be.json;
                 res.body.should.have.property("message");
@@ -73,13 +72,13 @@ describe("GET user account", function() {
     });
 
     // fail due to invalid login
-    it("should FAIL due to invalid password", function(done) {
+    it("should FAIL due to invalid password", function (done) {
         agent
             .post("/api/auth/login")
             .type("application/json")
             .send({
                 email: Admin0.email,
-                password: "FakePassword"
+                password: "FakePassword",
             })
             .end((err, res) => {
                 res.should.have.status(401);
@@ -90,7 +89,7 @@ describe("GET user account", function() {
     });
 
     // success case
-    it("should list the user's account on /api/account/self GET", function(done) {
+    it("should list the user's account on /api/account/self GET", function (done) {
         util.auth.login(agent, Admin0, (error) => {
             if (error) {
                 agent.close();
@@ -100,7 +99,7 @@ describe("GET user account", function() {
                 agent
                     .get("/api/account/self")
                     // does not have password because of to stripped json
-                    .end(function(err, res) {
+                    .end(function (err, res) {
                         if (err) {
                             return done(err);
                         }
@@ -108,7 +107,7 @@ describe("GET user account", function() {
                         res.should.be.json;
                         res.body.should.have.property("message");
                         res.body.message.should.equal(
-                            Constants.Success.ACCOUNT_READ
+                            Constants.Success.ACCOUNT_READ,
                         );
                         res.body.should.have.property("data");
                         res.body.data.should.be.a("object");
@@ -116,7 +115,7 @@ describe("GET user account", function() {
                         res.body.data.should.have.property("lastName");
                         res.body.data.should.have.property("email");
                         res.body.data.should.have.property(
-                            "dietaryRestrictions"
+                            "dietaryRestrictions",
                         );
                         res.body.data.should.have.property("gender");
                         done();
@@ -126,7 +125,7 @@ describe("GET user account", function() {
     });
 
     // success case - admin case
-    it("should list another account specified by id using admin priviledge on /api/account/:id/ GET", function(done) {
+    it("should list another account specified by id using admin priviledge on /api/account/:id/ GET", function (done) {
         util.auth.login(agent, Admin0, (error) => {
             if (error) {
                 agent.close();
@@ -136,7 +135,7 @@ describe("GET user account", function() {
                 agent
                     .get(`/api/account/${teamHackerAccount0._id}`)
                     // does not have password because of to stripped json
-                    .end(function(err, res) {
+                    .end(function (err, res) {
                         if (err) {
                             return done(err);
                         }
@@ -144,7 +143,7 @@ describe("GET user account", function() {
                         res.should.be.json;
                         res.body.should.have.property("message");
                         res.body.message.should.equal(
-                            Constants.Success.ACCOUNT_READ
+                            Constants.Success.ACCOUNT_READ,
                         );
                         res.body.should.have.property("data");
 
@@ -152,7 +151,7 @@ describe("GET user account", function() {
                         const acc = new Account(teamHackerAccount0);
                         chai.assert.equal(
                             JSON.stringify(res.body.data),
-                            JSON.stringify(acc.toStrippedJSON())
+                            JSON.stringify(acc.toStrippedJSON()),
                         );
                         done();
                     })
@@ -160,7 +159,7 @@ describe("GET user account", function() {
         });
     });
     // success case - user case
-    it("should list an account specified by id on /api/account/:id/ GET", function(done) {
+    it("should list an account specified by id on /api/account/:id/ GET", function (done) {
         util.auth.login(agent, teamHackerAccount0, (error) => {
             if (error) {
                 agent.close();
@@ -170,7 +169,7 @@ describe("GET user account", function() {
                 agent
                     .get(`/api/account/${teamHackerAccount0._id}`)
                     // does not have password because of to stripped json
-                    .end(function(err, res) {
+                    .end(function (err, res) {
                         if (err) {
                             return done(err);
                         }
@@ -178,7 +177,7 @@ describe("GET user account", function() {
                         res.should.be.json;
                         res.body.should.have.property("message");
                         res.body.message.should.equal(
-                            Constants.Success.ACCOUNT_READ
+                            Constants.Success.ACCOUNT_READ,
                         );
                         res.body.should.have.property("data");
 
@@ -186,7 +185,7 @@ describe("GET user account", function() {
                         const acc = new Account(teamHackerAccount0);
                         chai.assert.equal(
                             JSON.stringify(res.body.data),
-                            JSON.stringify(acc.toStrippedJSON())
+                            JSON.stringify(acc.toStrippedJSON()),
                         );
                         done();
                     })
@@ -195,7 +194,7 @@ describe("GET user account", function() {
     });
 
     // // fail case on authorization
-    it("should FAIL to list an account specified by id on /api/account/:id/ GET due to lack of authorization", function(done) {
+    it("should FAIL to list an account specified by id on /api/account/:id/ GET due to lack of authorization", function (done) {
         util.auth.login(agent, teamHackerAccount0, (error) => {
             if (error) {
                 agent.close();
@@ -205,7 +204,7 @@ describe("GET user account", function() {
                 agent
                     .get(`/api/account/${Admin0._id}`)
                     // does not have password because of to stripped json
-                    .end(function(err, res) {
+                    .end(function (err, res) {
                         if (err) {
                             return done(err);
                         }
@@ -213,7 +212,7 @@ describe("GET user account", function() {
                         res.should.be.json;
                         res.body.should.have.property("message");
                         res.body.message.should.equal(
-                            Constants.Error.AUTH_403_MESSAGE
+                            Constants.Error.AUTH_403_MESSAGE,
                         );
                         res.body.should.have.property("data");
 
@@ -224,13 +223,13 @@ describe("GET user account", function() {
     });
 });
 
-describe("POST create account", function() {
+describe("POST create account", function () {
     async function storeAll() {
         await util.account.storeHackerStaffAccounts();
         await util.role.storeAll();
         await util.roleBinding.storeAll();
     }
-    beforeEach(function(done) {
+    beforeEach(function (done) {
         this.timeout(60000);
         storeAll()
             .then(() => {
@@ -240,12 +239,12 @@ describe("POST create account", function() {
                 done(error);
             });
     });
-    it("should SUCCEED and create a new account", function(done) {
+    it("should SUCCEED and create a new account", function (done) {
         chai.request(server.app)
             .post(`/api/account/`)
             .type("application/json")
             .send(newAccount0)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 res.should.have.status(200);
                 res.should.be.json;
                 res.body.should.have.property("message");
@@ -258,27 +257,27 @@ describe("POST create account", function() {
                 delete res.body.data.id;
                 chai.assert.equal(
                     JSON.stringify(res.body.data),
-                    JSON.stringify(acc)
+                    JSON.stringify(acc),
                 );
                 done();
             });
     });
-    it("should FAIL to create an account because the email is already in use", function(done) {
+    it("should FAIL to create an account because the email is already in use", function (done) {
         chai.request(server.app)
             .post(`/api/account/`)
             .type("application/json")
             .send(teamHackerAccount0)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 res.should.have.status(422);
                 done();
             });
     });
-    it("should SUCCEED and create a new account without a phone number", function(done) {
+    it("should SUCCEED and create a new account without a phone number", function (done) {
         chai.request(server.app)
             .post("/api/account")
             .type("application/json")
             .send(noPhoneAccount)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 res.should.have.status(200);
                 res.should.be.json;
                 res.body.should.have.property("message");
@@ -292,21 +291,21 @@ describe("POST create account", function() {
 
                 chai.assert.equal(
                     JSON.stringify(res.body.data),
-                    JSON.stringify(acc)
+                    JSON.stringify(acc),
                 );
                 done();
             });
     });
 });
 
-describe("POST confirm account", function() {
+describe("POST confirm account", function () {
     async function storeAll() {
         await util.account.storeExtraAccounts();
         await util.accountConfirmation.storeAll();
         await util.role.storeAll();
         await util.roleBinding.storeAll();
     }
-    beforeEach(function(done) {
+    beforeEach(function (done) {
         this.timeout(60000);
         storeAll()
             .then(() => {
@@ -316,62 +315,62 @@ describe("POST confirm account", function() {
                 done(error);
             });
     });
-    it("should SUCCEED and confirm the account", function(done) {
+    it("should SUCCEED and confirm the account", function (done) {
         chai.request(server.app)
             .post(`/api/auth/confirm/${confirmationToken}`)
             .type("application/json")
-            .end(function(err, res) {
+            .end(function (err, res) {
                 res.should.have.status(200);
                 res.body.should.have.property("message");
                 res.body.message.should.equal(
-                    Constants.Success.AUTH_CONFIRM_ACCOUNT
+                    Constants.Success.AUTH_CONFIRM_ACCOUNT,
                 );
                 done();
             });
     });
 
-    it("should FAIL confirming the account", function(done) {
+    it("should FAIL confirming the account", function (done) {
         chai.request(server.app)
             .post(`/api/auth/confirm/${fakeToken}`)
             .type("application/json")
-            .end(function(err, res) {
+            .end(function (err, res) {
                 res.should.have.status(401);
                 res.body.should.have.property("message");
                 res.body.message.should.equal(
-                    Constants.Error.ACCOUNT_TOKEN_401_MESSAGE
+                    Constants.Error.ACCOUNT_TOKEN_401_MESSAGE,
                 );
                 done();
             });
     });
 
-    it("should FAIL to confirm account that has token with email but no account", function(done) {
+    it("should FAIL to confirm account that has token with email but no account", function (done) {
         chai.request(server.app)
             .post(`/api/auth/confirm/${fakeToken}`)
             .type("application/json")
-            .end(function(err, res) {
+            .end(function (err, res) {
                 res.should.have.status(401);
                 res.body.should.have.property("message");
                 res.body.message.should.equal(
-                    Constants.Error.ACCOUNT_TOKEN_401_MESSAGE
+                    Constants.Error.ACCOUNT_TOKEN_401_MESSAGE,
                 );
                 done();
             });
     });
 });
 
-describe("PATCH update account", function() {
+describe("PATCH update account", function () {
     const updatedInfo = {
         _id: teamHackerAccount0._id,
         firstName: "new",
         lastName: "name",
-        email: "newUpdatedEmail@mail.com"
+        email: "newUpdatedEmail@mail.com",
     };
 
     const failUpdatedInfo = {
         _id: Admin0._id,
         firstName: "fail",
         lastName: "fail",
-        email: storedAccount1.email
+        email: storedAccount1.email,
     };
     async function storeAll() {
         await util.account.storeHackerStaffExtraAccount();
@@ -379,7 +378,7 @@ describe("PATCH update account", function() {
         await util.role.storeAll();
         await util.roleBinding.storeAll();
     }
-    beforeEach(function(done) {
+    beforeEach(function (done) {
         this.timeout(60000);
         storeAll()
             .then(() => {
@@ -390,10 +389,10 @@ describe("PATCH update account", function() {
             });
     });
     // fail on authentication
-    it("should FAIL to update an account due to authentication", function(done) {
+    it("should FAIL to update an account due to authentication", function (done) {
         chai.request(server.app)
             .patch(`/api/account/${updatedInfo._id}`)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 res.should.have.status(401);
                 res.should.be.json;
                 res.body.should.have.property("message");
@@ -403,7 +402,7 @@ describe("PATCH update account", function() {
     });
 
     // succeed on :all case
-    it("should SUCCEED and use admin to update another account", function(done) {
+    it("should SUCCEED and use admin to update another account", function (done) {
         util.auth.login(agent, Admin0, (error) => {
             if (error) {
                 agent.close();
@@ -413,12 +412,12 @@ describe("PATCH update account", function() {
                 .patch(`/api/account/${updatedInfo._id}`)
                 .type("application/json")
                 .send(updatedInfo)
-                .end(function(err, res) {
+                .end(function (err, res) {
                     res.should.have.status(200);
                     res.should.be.json;
                     res.body.should.have.property("message");
                     res.body.message.should.equal(
-                        Constants.Success.ACCOUNT_UPDATE
+                        Constants.Success.ACCOUNT_UPDATE,
                     );
                     res.body.should.have.property("data");
                     // Is this correct matching of data?
@@ -430,7 +429,7 @@ describe("PATCH update account", function() {
     });
 
     // succeed on :self case
-    it("should SUCCEED and update the user's own account", function(done) {
+    it("should SUCCEED and update the user's own account", function (done) {
         util.auth.login(agent, teamHackerAccount0, (error) => {
             if (error) {
                 agent.close();
@@ -440,12 +439,12 @@ describe("PATCH update account", function() {
                 .patch(`/api/account/${updatedInfo._id}`)
                 .type("application/json")
                 .send(updatedInfo)
-                .end(function(err, res) {
+                .end(function (err, res) {
                     res.should.have.status(200);
                     res.should.be.json;
                     res.body.should.have.property("message");
                     res.body.message.should.equal(
-                        Constants.Success.ACCOUNT_UPDATE
+                        Constants.Success.ACCOUNT_UPDATE,
                     );
                     res.body.should.have.property("data");
                     // Is this correct matching of data?
@@ -458,7 +457,7 @@ describe("PATCH update account", function() {
     });
 
     // fail due to lack of authorization
-    it("should FAIL to update an account due to lack of authorization", function(done) {
+    it("should FAIL to update an account due to lack of authorization", function (done) {
         util.auth.login(agent, teamHackerAccount0, (error) => {
             if (error) {
                 agent.close();
@@ -468,12 +467,12 @@ describe("PATCH update account", function() {
                 .patch(`/api/account/${failUpdatedInfo._id}`)
                 .type("application/json")
                 .send(updatedInfo)
-                .end(function(err, res) {
+                .end(function (err, res) {
                     res.should.have.status(403);
                     res.should.be.json;
                     res.body.should.have.property("message");
                     res.body.message.should.equal(
-                        Constants.Error.AUTH_403_MESSAGE
+                        Constants.Error.AUTH_403_MESSAGE,
                     );
                     res.body.should.have.property("data");
 
@@ -483,7 +482,7 @@ describe("PATCH update account", function() {
     });
 
     // fail due to attempt to update account email to one that already exists in DB
-    it("should FAIL to update email to one that already exists", function(done) {
+    it("should FAIL to update email to one that already exists", function (done) {
         util.auth.login(agent, Admin0, (error) => {
             if (error) {
                 agent.close();
@@ -493,12 +492,12 @@ describe("PATCH update account", function() {
                 .patch(`/api/account/${failUpdatedInfo._id}`)
                 .type("application/json")
                 .send(failUpdatedInfo)
-                .end(function(err, res) {
+                .end(function (err, res) {
                     res.should.have.status(409);
                     res.should.be.json;
                     res.body.should.have.property("message");
                     res.body.message.should.equal(
-                        Constants.Error.ACCOUNT_EMAIL_409_MESSAGE
+                        Constants.Error.ACCOUNT_EMAIL_409_MESSAGE,
                     );
                     done();
                 });
@@ -506,9 +505,9 @@ describe("PATCH update account", function() {
     });
 });
 
-describe("POST reset password", function() {
+describe("POST reset password", function () {
     const password = {
-        password: "NewPassword"
+        password: "NewPassword",
     };
     async function storeAll() {
         await util.account.storeStoredTeamAccounts();
@@ -516,7 +515,7 @@ describe("POST reset password", function() {
         await util.role.storeAll();
         await util.roleBinding.storeAll();
     }
-    beforeEach(function(done) {
+    beforeEach(function (done) {
         this.timeout(60000);
         storeAll()
             .then(() => {
@@ -526,31 +525,31 @@ describe("POST reset password", function() {
                 done(error);
             });
     });
-    it("should SUCCEED and change the password", function(done) {
+    it("should SUCCEED and change the password", function (done) {
         chai.request(server.app)
             .post("/api/auth/password/reset")
             .type("application/json")
             .set("X-Reset-Token", resetToken)
             .send(password)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 res.should.have.status(200);
                 res.body.should.have.property("message");
                 res.body.message.should.equal(
-                    Constants.Success.AUTH_RESET_PASSWORD
+                    Constants.Success.AUTH_RESET_PASSWORD,
                 );
                 done();
             });
     });
 });
 
-describe("PATCH change password for logged in user", function() {
+describe("PATCH change password for logged in user", function () {
     const successChangePassword = {
         oldPassword: Admin0.password,
-        newPassword: "password12345"
+        newPassword: "password12345",
     };
     const failChangePassword = {
         oldPassword: "WrongPassword",
-        newPassword: "password12345"
+        newPassword: "password12345",
     };
     async function storeAll() {
         await util.account.storeGetInviteAccounts();
@@ -558,7 +557,7 @@ describe("PATCH change password for logged in user", function() {
         await util.role.storeAll();
         await util.roleBinding.storeAll();
     }
-    beforeEach(function(done) {
+    beforeEach(function (done) {
         this.timeout(60000);
         storeAll()
             .then(() => {
@@ -569,12 +568,12 @@ describe("PATCH change password for logged in user", function() {
             });
     });
     // fail on authentication
-    it("should FAIL to change the user's password because they are not logged in", function(done) {
+    it("should FAIL to change the user's password because they are not logged in", function (done) {
         chai.request(server.app)
             .patch("/api/auth/password/change")
             .type("application/json")
             .send(failChangePassword)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 res.should.have.status(401);
                 res.should.be.json;
                 res.body.should.have.property("message");
@@ -583,7 +582,7 @@ describe("PATCH change password for logged in user", function() {
             });
     });
     // success case
-    it("should change the logged in user's password to a new password", function(done) {
+    it("should change the logged in user's password to a new password", function (done) {
         util.auth.login(agent, Admin0, (error) => {
             if (error) {
                 agent.close();
@@ -593,19 +592,19 @@ describe("PATCH change password for logged in user", function() {
                 .patch("/api/auth/password/change")
                 .type("application/json")
                 .send(successChangePassword)
-                .end(function(err, res) {
+                .end(function (err, res) {
                     res.should.have.status(200);
                     res.should.be.json;
                     res.body.should.have.property("message");
                     res.body.message.should.equal(
-                        Constants.Success.AUTH_RESET_PASSWORD
+                        Constants.Success.AUTH_RESET_PASSWORD,
                     );
                     done();
                 });
         });
     });
     // fail case because old password in incorrect
-    it("should FAIL to change the logged in user's password to a new password because old password is incorrect", function(done) {
+    it("should FAIL to change the logged in user's password to a new password because old password is incorrect", function (done) {
         util.auth.login(agent, Admin0, (error) => {
             if (error) {
                 agent.close();
@@ -615,12 +614,12 @@ describe("PATCH change password for logged in user", function() {
                 .patch("/api/auth/password/change")
                 .type("application/json")
                 .send(failChangePassword)
-                .end(function(err, res) {
+                .end(function (err, res) {
                     res.should.have.status(401);
                     res.should.be.json;
                     res.body.should.have.property("message");
                     res.body.message.should.equal(
-                        Constants.Error.AUTH_401_MESSAGE
+                        Constants.Error.AUTH_401_MESSAGE,
                     );
                     done();
                 });
@@ -628,13 +627,13 @@ describe("PATCH change password for logged in user", function() {
     });
 });
 
-describe("GET retrieve permissions", function() {
+describe("GET retrieve permissions", function () {
     async function storeAll() {
         await util.account.storeHackerStaffAccounts();
         await util.role.storeAll();
         await util.roleBinding.storeAll();
     }
-    beforeEach(function(done) {
+    beforeEach(function (done) {
         this.timeout(60000);
         storeAll()
             .then(() => {
@@ -644,7 +643,7 @@ describe("GET retrieve permissions", function() {
                 done(error);
             });
     });
-    it("should SUCCEED and retrieve the rolebindings for the user", function(done) {
+    it("should SUCCEED and retrieve the rolebindings for the user", function (done) {
         util.auth.login(agent, teamHackerAccount0, (error) => {
             if (error) {
                 agent.close();
@@ -653,28 +652,28 @@ describe("GET retrieve permissions", function() {
             agent
                 .get("/api/auth/rolebindings/" + teamHackerAccount0._id)
                 .type("application/json")
-                .end(function(err, res) {
+                .end(function (err, res) {
                     res.should.have.status(200);
                     res.body.should.have.property("message");
                     res.body.message.should.equal(
-                        Constants.Success.AUTH_GET_ROLE_BINDINGS
+                        Constants.Success.AUTH_GET_ROLE_BINDINGS,
                     );
                     res.body.should.have.property("data");
                     res.body.data.should.be.a("object");
                     res.body.data.should.have.property("roles");
                     res.body.data.should.have.property("accountId");
                     res.body.data.accountId.should.equal(
-                        teamHackerAccount0._id.toHexString()
+                        teamHackerAccount0._id.toHexString(),
                     );
                     done();
                 });
         });
     });
-    it("should FAIL to retrieve the rolebindings as the account is not authenticated", function(done) {
+    it("should FAIL to retrieve the rolebindings as the account is not authenticated", function (done) {
         chai.request(server.app)
             .get("/api/auth/rolebindings/" + teamHackerAccount0._id)
             .type("application/json")
-            .end(function(err, res) {
+            .end(function (err, res) {
                 res.should.have.status(401);
                 res.body.should.have.property("message");
                 res.body.message.should.equal(Constants.Error.AUTH_401_MESSAGE);
@@ -683,12 +682,12 @@ describe("GET retrieve permissions", function() {
     });
 });
 
-describe("GET resend confirmation email", function() {
+describe("GET resend confirmation email", function () {
     async function storeAll() {
         await util.account.storeVerifyConfirmationAccounts();
         await util.accountConfirmation.storeAll();
     }
-    beforeEach(function(done) {
+    beforeEach(function (done) {
         this.timeout(60000);
         storeAll()
             .then(() => {
@@ -698,7 +697,7 @@ describe("GET resend confirmation email", function() {
                 done(error);
             });
     });
-    it("should SUCCEED and resend the confirmation email", function(done) {
+    it("should SUCCEED and resend the confirmation email", function (done) {
         util.auth.login(agent, storedAccount1, (error) => {
             if (error) {
                 agent.close();
@@ -707,18 +706,18 @@ describe("GET resend confirmation email", function() {
             agent
                 .get("/api/auth/confirm/resend")
                 .type("application/json")
-                .end(function(err, res) {
+                .end(function (err, res) {
                     res.should.have.status(200);
                     res.should.be.json;
                     res.body.should.have.property("message");
                     res.body.message.should.equal(
-                        Constants.Success.AUTH_SEND_CONFIRMATION_EMAIL
+                        Constants.Success.AUTH_SEND_CONFIRMATION_EMAIL,
                     );
                     done();
                 });
         });
     });
-    it("should FAIL as the account is already confirmed", function(done) {
+    it("should FAIL as the account is already confirmed", function (done) {
         util.auth.login(agent, teamHackerAccount0, (error) => {
             if (error) {
                 agent.close();
@@ -727,7 +726,7 @@ describe("GET resend confirmation email", function() {
             agent
                 .get("/api/auth/confirm/resend")
                 .type("application/json")
-                .end(function(err, res) {
+                .end(function (err, res) {
                     res.should.have.status(422);
                     res.should.be.json;
                     res.body.should.have.property("message");
@@ -736,7 +735,7 @@ describe("GET resend confirmation email", function() {
                 });
         });
     });
-    it("should FAIL as account confirmation token does not exist", function(done) {
+    it("should FAIL as account confirmation token does not exist", function (done) {
         util.auth.login(agent, storedAccount3, (error) => {
             if (error) {
                 agent.close();
@@ -745,12 +744,12 @@ describe("GET resend confirmation email", function() {
             agent
                 .get("/api/auth/confirm/resend")
                 .type("application/json")
-                .end(function(err, res) {
+                .end(function (err, res) {
                     res.should.have.status(428);
                     res.should.be.json;
                     res.body.should.have.property("message");
                     res.body.message.should.equal(
-                        "Account confirmation token does not exist"
+                        "Account confirmation token does not exist",
                     );
                     done();
                 });
@@ -758,13 +757,13 @@ describe("GET resend confirmation email", function() {
     });
 });
 
-describe("POST invite account", function() {
+describe("POST invite account", function () {
     async function storeAll() {
         await util.account.storeStaffUnlinkedAccount();
         await util.role.storeAll();
         await util.roleBinding.storeAll();
     }
-    beforeEach(function(done) {
+    beforeEach(function (done) {
         this.timeout(60000);
         storeAll()
             .then(() => {
@@ -774,7 +773,7 @@ describe("POST invite account", function() {
                 done(error);
             });
     });
-    it("Should succeed to invite a user to create an account", function(done) {
+    it("Should succeed to invite a user to create an account", function (done) {
         util.auth.login(agent, Admin0, (error) => {
             if (error) {
                 agent.close();
@@ -786,17 +785,17 @@ describe("POST invite account", function() {
                     .type("application/json")
                     .send({
                         email: newAccount0.email,
-                        accountType: Constants.General.VOLUNTEER
+                        accountType: Constants.General.VOLUNTEER,
                     })
                     // does not have password because of to stripped json
-                    .end(function(err, res) {
+                    .end(function (err, res) {
                         if (err) {
                             return done(err);
                         }
                         res.should.have.status(200);
                         res.body.should.have.property("message");
                         res.body.message.should.equal(
-                            Constants.Success.ACCOUNT_INVITE
+                            Constants.Success.ACCOUNT_INVITE,
                         );
                         done();
                     })
@@ -805,14 +804,14 @@ describe("POST invite account", function() {
     });
 });
 
-describe("GET invites", function() {
+describe("GET invites", function () {
     async function storeAll() {
         await util.account.storeGetInviteAccounts();
         await util.accountConfirmation.storeAll();
         await util.role.storeAll();
         await util.roleBinding.storeAll();
     }
-    beforeEach(function(done) {
+    beforeEach(function (done) {
         this.timeout(60000);
         storeAll()
             .then(() => {
@@ -822,23 +821,23 @@ describe("GET invites", function() {
                 done(error);
             });
     });
-    it("Should FAIL to get all invites due to Authentication", function(done) {
+    it("Should FAIL to get all invites due to Authentication", function (done) {
         chai.request(server.app)
             .get("/api/account/invite")
-            .end(function(err, res) {
+            .end(function (err, res) {
                 res.should.have.status(401);
                 res.body.should.have.property("message");
                 res.body.message.should.equal(Constants.Error.AUTH_401_MESSAGE);
                 done();
             });
     });
-    it("Should FAIL to get all invites due to Authorization", function(done) {
+    it("Should FAIL to get all invites due to Authorization", function (done) {
         util.auth.login(agent, teamHackerAccount0, (error) => {
             if (error) {
                 agent.close();
                 return done(error);
             }
-            return agent.get("/api/account/invite").end(function(err, res) {
+            return agent.get("/api/account/invite").end(function (err, res) {
                 res.should.have.status(403);
                 res.body.should.have.property("message");
                 res.body.message.should.equal(Constants.Error.AUTH_403_MESSAGE);
@@ -846,20 +845,20 @@ describe("GET invites", function() {
             });
         });
     });
-    it("Should SUCCEED to get all invites", function(done) {
+    it("Should SUCCEED to get all invites", function (done) {
         util.auth.login(agent, Admin0, (error) => {
             if (error) {
                 agent.close();
                 return done(error);
             }
-            return agent.get("/api/account/invite").end(function(err, res) {
+            return agent.get("/api/account/invite").end(function (err, res) {
                 if (err) {
                     return done(err);
                 }
                 res.should.have.status(200);
                 res.body.should.have.property("message");
                 res.body.message.should.equal(
-                    Constants.Success.ACCOUNT_GET_INVITES
+                    Constants.Success.ACCOUNT_GET_INVITES,
                 );
                 res.body.should.have.property("data");
                 res.body.data.should.have.property("invites");
