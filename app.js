@@ -46,8 +46,8 @@ if (!Services.env.isProduction()) {
     // TODO: change this when necessary
     corsOptions = {
         origin: [
-            `https://${process.env.FRONTEND_ADDRESS_DEPLOY}`,
-            `https://${process.env.FRONTEND_ADDRESS_BETA}`,
+            process.env.FRONTEND_ADDRESS_DEPLOY,
+            process.env.FRONTEND_ADDRESS_BETA,
             `https://docs.mchacks.ca`,
         ],
         credentials: true,
@@ -82,6 +82,7 @@ app.use(express.static(path.join(__dirname, "public")));
 var apiRouter = express.Router();
 
 accountRouter.activate(apiRouter);
+Services.log.info(`Services allowed: ${corsOptions.origin[0]}`);
 Services.log.info("Account router activated");
 authRouter.activate(apiRouter);
 Services.log.info("Auth router activated");
