@@ -8,7 +8,7 @@ const Services = {
     log: require("./services/logger.service"),
     db: require("./services/database.service"),
     auth: require("./services/auth.service"),
-    env: require("./services/env.service")
+    env: require("./services/env.service"),
 };
 
 const envLoadResult = Services.env.load(path.join(__dirname, "./.env"));
@@ -40,7 +40,7 @@ let corsOptions = {};
 if (!Services.env.isProduction()) {
     corsOptions = {
         origin: [`http://${process.env.FRONTEND_ADDRESS_DEV}`],
-        credentials: true
+        credentials: true,
     };
 } else {
     // TODO: change this when necessary
@@ -48,20 +48,20 @@ if (!Services.env.isProduction()) {
         origin: [
             `https://${process.env.FRONTEND_ADDRESS_DEPLOY}`,
             `https://${process.env.FRONTEND_ADDRESS_BETA}`,
-            `https://docs.mchacks.ca`
+            `https://docs.mchacks.ca`,
         ],
-        credentials: true
+        credentials: true,
     };
 }
-
+Services.log(corsOptions);
 app.use(cors(corsOptions));
 app.use(Services.log.requestLogger);
 app.use(Services.log.errorLogger);
 app.use(express.json());
 app.use(
     express.urlencoded({
-        extended: false
-    })
+        extended: false,
+    }),
 );
 app.use(cookieParser());
 //Cookie-based session tracking
@@ -72,8 +72,8 @@ app.use(
         // Cookie Options
         maxAge: 48 * 60 * 60 * 1000, //Logged in for 48 hours
         sameSite: process.env.COOKIE_SAME_SITE,
-        secureProxy: !Services.env.isTest()
-    })
+        secureProxy: !Services.env.isTest(),
+    }),
 );
 app.use(passport.initialize());
 app.use(passport.session()); //persistent login session
@@ -126,10 +126,10 @@ app.use((err, req, res, next) => {
     }
     res.status(status).json({
         message: message,
-        data: errorContents
+        data: errorContents,
     });
 });
 
 module.exports = {
-    app: app
+    app: app,
 };
