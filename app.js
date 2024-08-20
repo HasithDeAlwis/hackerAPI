@@ -53,7 +53,6 @@ if (!Services.env.isProduction()) {
         credentials: true,
     };
 }
-Services.log(corsOptions);
 app.use(cors(corsOptions));
 app.use(Services.log.requestLogger);
 app.use(Services.log.errorLogger);
