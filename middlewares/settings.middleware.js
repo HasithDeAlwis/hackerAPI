@@ -1,12 +1,12 @@
 const Services = {
     Settings: require("../services/settings.service"),
-    Account: require("../services/account.service")
+    Account: require("../services/account.service"),
 };
 const Middleware = {
-    Util: require("./util.middleware")
+    Util: require("./util.middleware"),
 };
 const Constants = {
-    Error: require("../constants/error.constant")
+    Error: require("../constants/error.constant"),
 };
 const Settings = require("../models/settings.model");
 
@@ -43,12 +43,12 @@ function parsePatch(req, res, next) {
  */
 async function updateSettings(req, res, next) {
     const settings = await Services.Settings.updateSettings(
-        req.body.settingsDetails
+        req.body.settingsDetails,
     );
     if (!settings) {
         return next({
             status: 500,
-            message: Constants.Error.GENERIC_500_MESSAGE
+            message: Constants.Error.GENERIC_500_MESSAGE,
         });
     } else {
         next();
@@ -73,7 +73,7 @@ function confirmValidPatch(req, res, next) {
     return next({
         status: 422,
         message: Constants.Error.SETTINGS_422_MESSAGE,
-        error: req.body.settingsDetails
+        error: req.body.settingsDetails,
     });
 }
 
@@ -90,7 +90,7 @@ async function getSettings(req, res, next) {
     if (!settings) {
         return next({
             status: 404,
-            message: Constants.Error.SETTINGS_404_MESSAGE
+            message: Constants.Error.SETTINGS_404_MESSAGE,
         });
     } else {
         req.body.settingsDetails = settings;
@@ -110,10 +110,10 @@ async function confirmAppsOpen(req, res, next) {
     if (!settings) {
         return next({
             status: 500,
-            message: Constants.Error.GENERIC_500_MESSAGE
+            message: Constants.Error.GENERIC_500_MESSAGE,
         });
     } else {
-        const now = Date.now();
+        console.log(settings);
         const openTime = new Date(settings.openTime);
         const closeTime = new Date(settings.closeTime);
         if (openTime < now && closeTime > now) {
@@ -121,7 +121,7 @@ async function confirmAppsOpen(req, res, next) {
         }
         return next({
             status: 403,
-            message: Constants.Error.SETTINGS_403_MESSAGE
+            message: Constants.Error.SETTINGS_403_MESSAGE,
         });
     }
 }
@@ -131,5 +131,5 @@ module.exports = {
     confirmValidPatch: confirmValidPatch,
     confirmAppsOpen: Middleware.Util.asyncMiddleware(confirmAppsOpen),
     updateSettings: Middleware.Util.asyncMiddleware(updateSettings),
-    getSettings: Middleware.Util.asyncMiddleware(getSettings)
+    getSettings: Middleware.Util.asyncMiddleware(getSettings),
 };

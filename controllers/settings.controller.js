@@ -15,7 +15,7 @@ function gotSettings(req, res) {
         data: {
             openTime: "2023-11-14T13:00:00.000Z",
             closeTime: "2025-01-08T16:59:00.000Z",
-            confirmTime: "2024-01-23T04:59:00.000Z",
+            confirmTime: "2025-01-23T04:59:00.000Z",
             isRemote: false,
             id: "61ea403fc5cf7d6e233def54",
         },

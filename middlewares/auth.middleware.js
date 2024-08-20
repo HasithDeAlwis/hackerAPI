@@ -10,17 +10,17 @@ const Services = {
     AccountConfirmation: require("../services/accountConfirmation.service"),
     Role: require("../services/role.service"),
     RoleBinding: require("../services/roleBinding.service"),
-    Env: require("../services/env.service")
+    Env: require("../services/env.service"),
 };
 
 const Middleware = {
-    Util: require("./util.middleware")
+    Util: require("./util.middleware"),
 };
 
 const Constants = {
     General: require("../constants/general.constant"),
     Error: require("../constants/error.constant"),
-    Role: require("../constants/role.constant")
+    Role: require("../constants/role.constant"),
 };
 
 /**
@@ -31,19 +31,19 @@ const Constants = {
  * Failed authentication returns a AUTH 401 error, and errors during login will return res with a LOGIN 500 error.
  */
 function login(req, res, next) {
-    passport.authenticate("emailAndPass", function(err, user) {
+    passport.authenticate("emailAndPass", function (err, user) {
         if (err) {
             return next({
                 status: 500,
                 message: Constants.Error.GENERIC_500_MESSAGE,
-                error: {}
+                error: {},
             });
         }
         if (!user) {
             return next({
                 status: 401,
                 message: Constants.Error.AUTH_401_MESSAGE,
-                error: {}
+                error: {},
             });
         }
         req.login(user, (loginErr) => {
@@ -51,7 +51,7 @@ function login(req, res, next) {
                 return next({
                     status: 500,
                     message: Constants.Error.LOGIN_500_MESSAGE,
-                    error: {}
+                    error: {},
                 });
             }
             return next();
@@ -64,14 +64,14 @@ function login(req, res, next) {
  * Calls next() if the user is properly authenticated.
  */
 function ensureAuthenticated() {
-    return function(req, res, next) {
+    return function (req, res, next) {
         if (req.isUnauthenticated()) {
             return next({
                 status: 401,
                 message: Constants.Error.AUTH_401_MESSAGE,
                 error: {
-                    route: req.path
-                }
+                    route: req.path,
+                },
             });
         } else {
             return next();
@@ -85,7 +85,7 @@ function ensureAuthenticated() {
  * Calls next() if the user is properly authorized.
  */
 function ensureAuthorized(findByIdFns) {
-    return function(req, res, next) {
+    return function (req, res, next) {
         Services.Auth.ensureAuthorized(req, findByIdFns).then(
             (auth) => {
                 if (!auth) {
@@ -93,8 +93,8 @@ function ensureAuthorized(findByIdFns) {
                         status: 403,
                         message: Constants.Error.AUTH_403_MESSAGE,
                         error: {
-                            route: req.path
-                        }
+                            route: req.path,
+                        },
                     });
                 } else {
                     return next();
@@ -102,7 +102,7 @@ function ensureAuthorized(findByIdFns) {
             },
             (err) => {
                 return next(err);
-            }
+            },
         );
     };
 }
@@ -115,12 +115,12 @@ function ensureAuthorized(findByIdFns) {
  */
 async function retrieveRoleBindings(req, res, next) {
     const roleBindings = await Services.RoleBinding.getRoleBindingForAcct(
-        req.params.id
+        req.params.id,
     );
     if (!roleBindings) {
         return next({
             status: 404,
-            message: "Role Bindings not found"
+            message: "Role Bindings not found",
         });
     }
     req.roleBindings = roleBindings;
@@ -137,19 +137,19 @@ async function retrieveRoleBindings(req, res, next) {
 async function changePassword(req, res, next) {
     const acc = await Services.Account.getAccountIfValid(
         req.user.email,
-        req.body.oldPassword
+        req.body.oldPassword,
     );
     // user's old password is correct
     if (!!acc) {
         req.body.account = await Services.Account.updatePassword(
             req.user.id,
-            req.body.newPassword
+            req.body.newPassword,
         );
         return next();
     } else {
         return next({
             status: 401,
-            message: Constants.Error.AUTH_401_MESSAGE
+            message: Constants.Error.AUTH_401_MESSAGE,
         });
     }
 }
@@ -166,13 +166,12 @@ async function sendResetPasswordEmailMiddleware(req, res, next) {
         //create the reset password token
         await Services.ResetPasswordToken.create(user.id);
         //find the thing we just created
-        const ResetPasswordTokenModel = await Services.ResetPasswordToken.findByAccountId(
-            user.id
-        );
+        const ResetPasswordTokenModel =
+            await Services.ResetPasswordToken.findByAccountId(user.id);
         //generate email
         const token = Services.ResetPasswordToken.generateToken(
             ResetPasswordTokenModel.id,
-            user.id
+            user.id,
         );
         const address = Services.Env.isProduction()
             ? process.env.FRONTEND_ADDRESS_DEPLOY
@@ -180,7 +179,7 @@ async function sendResetPasswordEmailMiddleware(req, res, next) {
         const mailData = Services.ResetPasswordToken.generateResetPasswordEmail(
             address,
             req.body.email,
-            token
+            token,
         );
         if (mailData !== undefined) {
             Services.Email.send(mailData, (err) => {
@@ -192,7 +191,7 @@ async function sendResetPasswordEmailMiddleware(req, res, next) {
             });
         } else {
             return next({
-                message: Constants.Error.EMAIL_500_MESSAGE
+                message: Constants.Error.EMAIL_500_MESSAGE,
             });
         }
     } else {
@@ -218,24 +217,24 @@ async function sendConfirmAccountEmail(req, res, next) {
         Constants.General.HACKER,
         account.email,
         Constants.General.CONFIRMATION_TYPE_ORGANIC,
-        account.id
+        account.id,
     );
-    const accountConfirmationToken = await Services.AccountConfirmation.findByAccountId(
-        account.id
-    );
+    const accountConfirmationToken =
+        await Services.AccountConfirmation.findByAccountId(account.id);
     const token = Services.AccountConfirmation.generateToken(
         accountConfirmationToken.id,
-        account.id
+        account.id,
     );
     const address = Services.Env.isProduction()
         ? process.env.FRONTEND_ADDRESS_DEPLOY
         : process.env.FRONTEND_ADDRESS_DEV;
-    const mailData = Services.AccountConfirmation.generateAccountConfirmationEmail(
-        address,
-        account.email,
-        Constants.General.HACKER,
-        token
-    );
+    const mailData =
+        Services.AccountConfirmation.generateAccountConfirmationEmail(
+            address,
+            account.email,
+            Constants.General.HACKER,
+            token,
+        );
     if (mailData !== undefined) {
         Services.Email.send(mailData, (err) => {
             if (err) {
@@ -246,7 +245,7 @@ async function sendConfirmAccountEmail(req, res, next) {
         });
     } else {
         return next({
-            message: Constants.Error.EMAIL_500_MESSAGE
+            message: Constants.Error.EMAIL_500_MESSAGE,
         });
     }
 }
@@ -262,31 +261,31 @@ async function resendConfirmAccountEmail(req, res, next) {
     if (account.confirmed) {
         return next({
             status: 422,
-            message: "Account already confirmed"
+            message: "Account already confirmed",
         });
     }
-    const accountConfirmationToken = await Services.AccountConfirmation.findByAccountId(
-        account.id
-    );
+    const accountConfirmationToken =
+        await Services.AccountConfirmation.findByAccountId(account.id);
     if (!accountConfirmationToken) {
         return next({
             status: 428,
-            message: "Account confirmation token does not exist"
+            message: "Account confirmation token does not exist",
         });
     }
     const token = Services.AccountConfirmation.generateToken(
         accountConfirmationToken.id,
-        account.id
+        account.id,
     );
     const address = Services.Env.isProduction()
         ? process.env.FRONTEND_ADDRESS_DEPLOY
         : process.env.FRONTEND_ADDRESS_DEV;
-    const mailData = Services.AccountConfirmation.generateAccountConfirmationEmail(
-        address,
-        account.email,
-        accountConfirmationToken.accountType,
-        token
-    );
+    const mailData =
+        Services.AccountConfirmation.generateAccountConfirmationEmail(
+            address,
+            account.email,
+            accountConfirmationToken.accountType,
+            token,
+        );
     if (mailData !== undefined) {
         Services.Email.send(mailData, (err) => {
             if (err) {
@@ -297,7 +296,7 @@ async function resendConfirmAccountEmail(req, res, next) {
         });
     } else {
         return next({
-            message: "Error while generating email"
+            message: "Error while generating email",
         });
     }
 }
@@ -313,14 +312,14 @@ function parseResetToken(req, res, next) {
     jwt.verify(
         req.body["x-reset-token"],
         process.env.JWT_RESET_PWD_SECRET,
-        function(err, decoded) {
+        function (err, decoded) {
             if (err) {
                 return next(err);
             } else {
                 req.body.decodedToken = decoded;
                 return next();
             }
-        }
+        },
     );
 }
 
@@ -334,16 +333,17 @@ function parseResetToken(req, res, next) {
  */
 function parseAccountConfirmationToken(req, res, next) {
     if (!!req.body.token) {
-        jwt.verify(req.body.token, process.env.JWT_CONFIRM_ACC_SECRET, function(
-            err,
-            decoded
-        ) {
-            if (err) {
-                return next(err);
-            } else {
-                req.body.decodedToken = decoded;
-            }
-        });
+        jwt.verify(
+            req.body.token,
+            process.env.JWT_CONFIRM_ACC_SECRET,
+            function (err, decoded) {
+                if (err) {
+                    return next(err);
+                } else {
+                    req.body.decodedToken = decoded;
+                }
+            },
+        );
     }
     return next();
 }
@@ -356,7 +356,7 @@ function parseAccountConfirmationToken(req, res, next) {
  */
 async function getAccountTypeFromConfirmationToken(req, res, next) {
     const confirmationObj = await Services.AccountConfirmation.findById(
-        req.body.decodedToken.accountConfirmationId
+        req.body.decodedToken.accountConfirmationId,
     );
     if (confirmationObj) {
         req.body.accountType = confirmationObj.accountType;
@@ -366,7 +366,7 @@ async function getAccountTypeFromConfirmationToken(req, res, next) {
         return next({
             status: 401,
             message: Constants.Error.ACCOUNT_TOKEN_401_MESSAGE,
-            error: {}
+            error: {},
         });
     }
 }
@@ -379,10 +379,10 @@ async function getAccountTypeFromConfirmationToken(req, res, next) {
  */
 async function validateResetToken(req, res, next) {
     const resetObj = await Services.ResetPasswordToken.findById(
-        req.body.decodedToken.resetId
+        req.body.decodedToken.resetId,
     );
     const userObj = await Services.Account.findById(
-        req.body.decodedToken.accountId
+        req.body.decodedToken.accountId,
     );
     if (resetObj && userObj) {
         req.body.user = userObj;
@@ -392,7 +392,7 @@ async function validateResetToken(req, res, next) {
         return next({
             status: 401,
             message: Constants.Error.ACCOUNT_TOKEN_401_MESSAGE,
-            error: {}
+            error: {},
         });
     }
 }
@@ -405,10 +405,10 @@ async function validateResetToken(req, res, next) {
  */
 async function validateConfirmationToken(req, res, next) {
     const confirmationObj = await Services.AccountConfirmation.findById(
-        req.body.decodedToken.accountConfirmationId
+        req.body.decodedToken.accountConfirmationId,
     );
     const userObj = await Services.Account.findById(
-        req.body.decodedToken.accountId
+        req.body.decodedToken.accountId,
     );
     if (confirmationObj && userObj && confirmationObj.accountId == userObj.id) {
         userObj.confirmed = true;
@@ -421,7 +421,7 @@ async function validateConfirmationToken(req, res, next) {
         return next({
             status: 401,
             message: Constants.Error.ACCOUNT_TOKEN_401_MESSAGE,
-            error: {}
+            error: {},
         });
     }
 }
@@ -437,7 +437,7 @@ async function validateConfirmationToken(req, res, next) {
 async function validateConfirmationTokenWithoutAccount(req, res, next) {
     if (req.body.decodedToken) {
         const confirmationObj = await Services.AccountConfirmation.findById(
-            req.body.decodedToken.accountConfirmationId
+            req.body.decodedToken.accountConfirmationId,
         );
         if (!confirmationObj.accountId) {
             req.body.accountDetails.confirmed = true;
@@ -460,7 +460,7 @@ function deleteResetToken(req, res, next) {
         },
         (err) => {
             return next(err);
-        }
+        },
     );
 }
 
@@ -475,7 +475,7 @@ async function addCreationRoleBindings(req, res, next) {
         // Staff do not have to create a STAFF object, so give them the full permissions immediately.
         await Services.RoleBinding.createRoleBindingByRoleName(
             req.body.account.id,
-            Constants.Role.adminRole.name
+            Constants.Role.adminRole.name,
         );
     } else {
         // Get the default role for the account type given
@@ -483,12 +483,12 @@ async function addCreationRoleBindings(req, res, next) {
             Constants.General.POST_ROLES[req.body.account.accountType];
         await Services.RoleBinding.createRoleBindingByRoleName(
             req.body.account.id,
-            roleName
+            roleName,
         );
         // Add default account role bindings
         await Services.RoleBinding.createRoleBindingByRoleName(
             req.body.account.id,
-            Constants.Role.accountRole.name
+            Constants.Role.accountRole.name,
         );
     }
     return next();
@@ -502,7 +502,7 @@ function createRoleBindings(roleName = undefined) {
     return Middleware.Util.asyncMiddleware(async (req, res, next) => {
         await Services.RoleBinding.createRoleBindingByRoleName(
             req.user.id,
-            roleName
+            roleName,
         );
         return next();
     });
@@ -517,7 +517,7 @@ function createRoleBindings(roleName = undefined) {
 async function addAccountTypeRoleBinding(req, res, next) {
     await Services.RoleBinding.createRoleBindingByRoleName(
         req.user.id,
-        req.user.accountType
+        req.user.accountType,
     );
     return next();
 }
@@ -540,35 +540,35 @@ module.exports = {
     ensureAuthenticated: ensureAuthenticated,
     ensureAuthorized: ensureAuthorized,
     sendResetPasswordEmailMiddleware: Middleware.Util.asyncMiddleware(
-        sendResetPasswordEmailMiddleware
+        sendResetPasswordEmailMiddleware,
     ),
     parseResetToken: parseResetToken,
     validateResetToken: Middleware.Util.asyncMiddleware(validateResetToken),
     deleteResetToken: deleteResetToken,
     sendConfirmAccountEmail: Middleware.Util.asyncMiddleware(
-        sendConfirmAccountEmail
+        sendConfirmAccountEmail,
     ),
     parseAccountConfirmationToken: parseAccountConfirmationToken,
     validateConfirmationToken: Middleware.Util.asyncMiddleware(
-        validateConfirmationToken
+        validateConfirmationToken,
     ),
     getAccountTypeFromConfirmationToken: Middleware.Util.asyncMiddleware(
-        getAccountTypeFromConfirmationToken
+        getAccountTypeFromConfirmationToken,
     ),
     validateConfirmationTokenWithoutAccount: Middleware.Util.asyncMiddleware(
-        validateConfirmationTokenWithoutAccount
+        validateConfirmationTokenWithoutAccount,
     ),
     createRoleBindings: createRoleBindings,
     addAccountTypeRoleBinding: Middleware.Util.asyncMiddleware(
-        addAccountTypeRoleBinding
+        addAccountTypeRoleBinding,
     ),
     addCreationRoleBindings: Middleware.Util.asyncMiddleware(
-        addCreationRoleBindings
+        addCreationRoleBindings,
     ),
     resendConfirmAccountEmail: Middleware.Util.asyncMiddleware(
-        resendConfirmAccountEmail
+        resendConfirmAccountEmail,
     ),
     retrieveRoleBindings: Middleware.Util.asyncMiddleware(retrieveRoleBindings),
     retrieveRoles: Middleware.Util.asyncMiddleware(retrieveRoles),
-    changePassword: Middleware.Util.asyncMiddleware(changePassword)
+    changePassword: Middleware.Util.asyncMiddleware(changePassword),
 };
