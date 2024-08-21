@@ -113,7 +113,7 @@ async function confirmAppsOpen(req, res, next) {
             message: Constants.Error.GENERIC_500_MESSAGE,
         });
     } else {
-        console.log(settings);
+        const now = Date.now();        
         const openTime = new Date(settings.openTime);
         const closeTime = new Date(settings.closeTime);
         if (openTime < now && closeTime > now) {
